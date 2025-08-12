@@ -1,10 +1,10 @@
 
 
-# ................... 287 Kubernetes Interview Questions  ....................
+# ................... 288 Kubernetes Interview Questions  ....................
 
 ## By  Mamun Rashid :: https://www.linkedin.com/in/mamunrashid/ 
 
-### Last Updated: 2022.12.13
+### Last Updated: 2023.02.05
 
 ##
 
@@ -755,7 +755,7 @@
 
 ## .......
 
-#### 68. How does the Master server talk to etcd ?
+#### 68. How does the Master server authenticate itself to etcd ?
 
      Answer: It makes a call etcd (runs on localhost in most cases). To do that, it authorizes itself with etcd using 2 certs and 1 key.
                AND sends commands to etcd.
@@ -809,7 +809,7 @@
 
 #### 72. Kubectl command to create deployment with busybox version 1.13  
      
-     Answer: kubectl run foo-deploy --image=busybox:1:13 --replica=1 --record  # create deployment w busybox 1.13
+     Answer: kubectl create deployment foo-deploy --image=busybox:1:13 --replica=1 --record  # create deployment w busybox 1.13
 
 ## .
 
@@ -941,7 +941,7 @@
 #### 84. How do you generate a CSR within the Kubernetes system?
 
      Answer: 
-       a. create a .csr file
+       a. create a .csr file using openssl command (and a private key, but does not matter to Kubernetes)
        b. encode it
        c. create a yaml file (Kind: CertificateSigningRequest) using the encoded CSR
        d. kubectl apply -f CertificateSigningRequest.yaml
@@ -3046,6 +3046,225 @@
 
 
 
+## ......
+
+### 288. What is a finalizer in Kubernetes?
+
+    Answer: Verbatim from Kubernetes.io
+
+    Finalizers are namespaced keys that tell Kubernetes to wait until specific conditions are met before it 
+    fully deletes resources marked for deletion. Finalizers alert controllers to clean up resources the deleted object owned.
+
+    When you tell Kubernetes to delete an object that has finalizers specified for it, the Kubernetes API marks the object for 
+    deletion by populating .metadata.deletionTimestamp, and returns a 202 status code (HTTP "Accepted"). The target object 
+    remains in a terminating state while the control plane, or other components, take the actions defined by the finalizers. 
+    After these actions are complete, the controller removes the relevant finalizers from the target object. When the 
+    metadata.finalizers field is empty, Kubernetes considers the deletion complete and deletes the object.
+
+## .
+
+
+
+## ......
+
+### 289. If a client sends a request API server, which component intercepts that request to make sure that the request should be acted upon?
+
+    Answer: Admission Controllers. There can be many. Be default, a few of them are already enabled.
+            You can your own.
+            Admission controllers act AFTER authentication has happened and authorization has been finalized.
+
+## .
+
+
+
+
+## ......
+
+### 290. If you have a YAML file that has codes for 10 different resources (pods, deployments etc). How can delete all resources made from this YAML file?
+
+    Answer: kubectl apply -f filename.yaml
+
+## .
+
+
+
+## ......
+
+### 291. In order to follow DRY principle, your code should work across all enviroments (dev, staging , prod). How can you do this when you know things will be different across various environments?
+
+    Answer: configmaps! (Code remains same , only the values of config-maps differ)
+
+## .
+
+
+
+## ......
+
+### 292. Why do we need PV and PVC? Why not just PV or just PVC?
+
+    Answer: de-coupling. This way, you can define your PVs not knowing when they will be used. Similarly, you can create PVC knowking PV already exists.
+
+## .
+
+
+## ......
+
+### 293. Why do we need storageclass?
+
+    Answer: Again, de-coupling. You can define many kinds of storage (fast, slow, EBS, GCS, NFS, on and on). You can just use them as you see fit.
+
+## .
+
+
+## ......
+
+### 294. Explain how a container mounts a volume.
+
+    Answer: Actually containers depends on the pods to "define" the volume and give it a name. Container then uses that "name" and mounts it on whichever directory it wants to. This way, two conatiners on the SAME pod can mount the same volume on two different mounting locations.
+
+## .
+
+
+
+## ......
+
+### 295. Explain the flow from a CSR all the way to a user having permission to describe a pod?
+
+    Answer: 
+    1. CSR is created
+    2. That is submitted to Kubernetes cluster
+    3. Someone approves the csr within Kubernetes. 
+    4. That creates a valid certificate which has an embedded user
+    5. On the other side of things, a role is create with certain permissions (e.g. describe a pod)
+    6. That user/certificate is associated with that role via roleBinding. This completes the path.
+
+## .
+
+
+## ......
+
+### 296. Why do we need Labels?
+
+    Answer: Labels are integral part of Kubernetes. Whenever there is need to select one or more out of many, a label is used. For example, you may have 1000 pods. Only 10 of them belong to a deployment or service. This one to many relationship can dynamicaly established by selecting pods based on their labels. 
+
+## .
+
+
+## ......
+
+### 297. You are applying a YAML file. But, you get an error , something like: "expecting X got Y" (e.g. expecting map, got string).  How do you fix this? 
+
+    Answer: Note the line number the error message tells you. See, which attribute is mentioned in that line. Then, use kubectl explain command to see what type of a thing is expected. May there is supposed to be an array of strings. But, because of a typo, to Kubernetes, it looks like a string or map/object. This will give a great clue as to what the typo is.
+
+## .
+
+
+## ......
+
+### 298. Why do we need Node Pools?
+
+    Answer: Node Pools are nodes that share the same configurations (e.g. cpu/memory etc.). What if some of your pods needs more resources and you want those pods to go into only a certian node pool. And, you do not want other normal pods to go into those nodes. In this case, having 2 node pools would be very useful.  Node pools can also be used to segment out usage by different teams/environments/departments. 
+
+## .
+
+
+## ......
+
+### 299. What is the connection between values.yaml (Helm) and configmaps?
+
+    Answer: values.yaml in Helm charts save all the env specific values (lets say , server type, application name etc.). This way, we cna follow DRY principles of coding when we code for multiple environments. These "values" in turn can "feed" the configmaps in Kubernetes environments.
+
+## .
+
+
+## ......
+
+### 300. How do you service discovery in Kubernetes?
+
+    Answer: 2 Ways: 1. Via DNS or 2. via ENV variable (e.g. SQL_SERVER=1.2.3.4) injected into container via ConfigMap or Secret.
+
+## .
+
+
+## ......
+
+### 301.  Why do you need a "job" in Kubernetes?
+
+    Answer: Sometimes there is a need for pod to be created for the sole reason of doing a task ONLY once. "job" is how you define that.
+
+## .
+
+
+## ......
+
+### 302.  Why do you need a "cronjob" in Kubernetes?
+
+    Answer: Sometimes there is a need for pod to be created on a regular schedule to do a job. A "cronjob" is great for this use case.
+
+## .
+
+
+## ......
+
+### 303.  Where did you have your hands-on experience on Kubernetes?
+
+    Answer: Interviwer may not ask this directly, but he or she will want to know how you have the experience that you have. This is because people's experience with Kubernetes vary widely. Be truthful. If your experience is that you have done labs on your own or as part of certification exam prep, state THAT! If you fake the experience, it will show and you will come across as unauthentic. Be ready for this question. 
+
+## .
+
+
+## ......
+
+### 303.  How did you manage logging persistence? 
+
+    Answer: Will depend on your experience. Here are some possibilities: Prometheus, Datadog, Agents, other 3rd party solutions.
+
+## .
+
+
+## ......
+
+### 304.  You just created a cluster. How do you know what is running there by default?
+
+    Answer: k get all -A
+
+## .
+
+
+## ......
+
+### 305. On a fresh cluster, which namespace holds the system resources like kube-dns?
+
+    Answer: kube-system  (Here the interviwer is probing for your hands on experience. If you work on Kubernetes regularly, you will know this)
+
+## .
+
+
+## ......
+
+### 306.  Walk me through the steps of how you store password in Kubernetes? (e.g. DB password)
+
+    Answer:   base64 encoding --> make a secret, "data" section, key-value pair --> mount it on a pod/container
+
+## .
+
+
+## ......
+
+### 307.  All I am giving you a docker image (that runs a web server). You don't even have a cluster. Walk me through how you take this service live. Assume that you don't scaling or HA.
+
+    Answer:  Create a cluster. Upload the image one GCP container registry. Creat a YAML file that creates a deployment using that image. Create a service (Type Load Balancer) using that deployment. Create a DNS recording pointing to the endpoint of that service.
+
+## .
+
+
+## ......
+
+### 308.  What is the different between ingress and Network Policy?  
+
+    Answer: Ingress = Like API Gateway in AWS (drive traffic to different services based on path) ; Network Policy: Firewall Rules, basically
+
+## .
 
 
 
@@ -3054,6 +3273,24 @@
 
 
 
+
+
+
+More Unformatted questions:
+__________________________
+You have created a PV using hostpath. How do you know if all is well. ans: describe and status should say "available"
+Can you use 2 PVCs with 1 PV? no! 1:1
+3 recycle policies for PV: retain, recycle, delete
+If retain , then: pvs goes away, PV will still just sitv there
+Can multiple pods use the same PVC? yes
+Tell me when you will use a label selector
+You have 5 departments on 1 cluster. Each has their own namespace. How can you keep dept1 from using up all the resources? use quota. quota is applied at namespace level.
+Once you have MYSQL pods running, how can you make a service out of them?
+   port 3306
+   targetport 3306
+   use label selector to select pods for backend
+You have 20 nodes. You want to use 10 of then ONLY for production pods. How? taint the nodes
+Pods in pending state. why? nodes tainted or not enough resources left or node affinity set wrong
 
 
 
